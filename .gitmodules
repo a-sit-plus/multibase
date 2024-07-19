@@ -1,0 +1,3 @@
+[submodule "src/commonTest/resources/multibase"]
+	path = src/commonTest/resources/multibase
+	url = https://github.com/multiformats/multibase.git
