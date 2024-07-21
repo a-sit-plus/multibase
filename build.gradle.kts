@@ -107,6 +107,7 @@ kotlin {
             implementation("com.ionspin.kotlin:bignum:0.3.10")
             api("io.matthewnelson.encoding:base64:2.2.1")
             api("io.matthewnelson.encoding:base32:2.2.1")
+            api("io.matthewnelson.encoding:base16:2.2.1")
         }
 
         commonTest.dependencies {

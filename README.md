@@ -53,7 +53,7 @@ dependencies {
     implementation("at.asitplus:multibase:$version")
 }
 ```
-Note: This library exposes Matthew Nelson's Base64 and Base32 encoders as API dependency!
+Note: This library exposes Matthew Nelson's Base64, Base32, and Base16 encoders as API dependency!
 
 ### API
 
@@ -62,7 +62,7 @@ or use the extension functions:
  * `multibase_string.multibaseDecode()`
  * `byteArray.multibaseEncode(Base.<desired>)`
 
-Note: Base10, Base16 and Base58 don't perform well. Only use those on small (<4KiB) data.
+Note: Base10 and Base58 don't perform well. Only use those on small (<4KiB) data.
 
 'Nuff said!
 

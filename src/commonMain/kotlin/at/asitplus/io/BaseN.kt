@@ -27,6 +27,7 @@ package at.asitplus.io
 
 import com.ionspin.kotlin.bignum.integer.BigInteger
 import com.ionspin.kotlin.bignum.integer.Sign
+import io.matthewnelson.encoding.base16.Base16
 import io.matthewnelson.encoding.base32.Base32Default
 import io.matthewnelson.encoding.base32.Base32Hex
 import io.matthewnelson.encoding.base64.Base64
@@ -37,11 +38,12 @@ import io.matthewnelson.encoding.core.EncodingException
 
 
 /**
- * changjiashuai@gmail.com.
- *
- * Created by CJS on 2018/7/14.
+ * Use this to manually encode/decode BaseN, but only if you know what you're doing!
+ * Originally created by [CJS](mailto:changjiashuai@gmail.com) on 2018/7/14 without documentation and since -- even though
+ * it is extremely versatile -- it performs poorly, we better keep it like that. After all, we don't want to tempt
+ * folk to produce code that performs poorly.
  */
-private object BaseN {
+object BaseN {
 
     fun decode(alphabet: String, base: BigInteger, input: String): ByteArray {
         val bytes = decodeToBigInteger(alphabet, base, input).toByteArray()
@@ -143,8 +145,8 @@ object MultiBase {
     fun encode(base: Base, data: ByteArray): String {
         return when (base) {
             Base.BASE10 -> base.prefix + BaseN.encode(base.alphabet, BigInteger(10), data)
-            Base.BASE16 -> base.prefix + BaseN.encode(base.alphabet, BigInteger(16), data.expandNullPrefix())
-            Base.BASE16_UPPER -> base.prefix + BaseN.encode(base.alphabet, BigInteger(16), data.expandNullPrefix())
+            Base.BASE16 -> base.prefix + data.encodeToString(Base16Lower)
+            Base.BASE16_UPPER -> base.prefix + data.encodeToString(Base16Upper)
             Base.BASE32 -> base.prefix + data.encodeToString(Base32Lower)
             Base.BASE32_UPPER -> base.prefix + data.encodeToString(Base32Upper)
             Base.BASE32_PAD -> base.prefix + data.encodeToString(Base32Pad)
@@ -162,29 +164,6 @@ object MultiBase {
         }
     }
 
-    private fun ByteArray.expandNullPrefix(): ByteArray {
-
-        var prefix = true
-        return map {
-            if (prefix && it == 0.toByte()) listOf(0.toByte(), 0.toByte()) else {
-                prefix = false
-                listOf(it)
-            }
-        }.flatten().toByteArray()
-    }
-
-    private fun ByteArray.squashNullPrefix(): ByteArray {
-        var prefix = true
-        return asList().chunked(2).map { ch ->
-            if (prefix && ch.first() == 0.toByte() && ch.last() == 0.toByte()) {
-                listOf((0.toByte()))
-            } else {
-                prefix = false
-                ch
-            }
-        }.flatten().toByteArray()
-    }
-
     /**
      * Decodes the given multibase [data] into a ByteArray.
      * This method throws Exceptions for strings that are not valid multibase encodings.
@@ -197,8 +176,8 @@ object MultiBase {
         val rest = data.substring(1)
         return when (val base = Base.lookup(prefix)) {
             Base.BASE10 -> BaseN.decode(base.alphabet, BigInteger(10), rest)
-            Base.BASE16 -> BaseN.decode(base.alphabet, BigInteger(16), rest.lowercase()).squashNullPrefix()
-            Base.BASE16_UPPER -> BaseN.decode(base.alphabet, BigInteger(16), rest.uppercase()).squashNullPrefix()
+            Base.BASE16 -> rest.decodeToByteArray(Base16Lower)
+            Base.BASE16_UPPER ->  rest.decodeToByteArray(Base16Upper)
             Base.BASE32 -> rest.decodeToByteArray(Base32Lower)
             Base.BASE32_PAD -> rest.decodeToByteArray(Base32Pad)
             Base.BASE32_HEX_PAD -> rest.decodeToByteArray(Base32HexPadLower)
@@ -274,3 +253,6 @@ private val Base32HexPadUpper = Base32Hex { isLenient = false; padEncoded = true
 
 private val Base32HexLower = Base32Hex { padEncoded = false;encodeToLowercase = true }
 private val Base32HexUpper = Base32Hex { padEncoded = false;encodeToLowercase = false }
+
+private val Base16Lower = Base16 { encodeToLowercase = true }
+private val Base16Upper = Base16 { encodeToLowercase = false }
