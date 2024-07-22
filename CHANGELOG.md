@@ -1,5 +1,8 @@
 # 1.x
 
+## 1.1.1
+* Fix Typo in POM
+
 ## 1.1.0
 
 * Delegate Base16 encoding/decoding to Matthew Nelsons's encoder/decoder to improve performance

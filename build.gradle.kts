@@ -124,7 +124,7 @@ kotlin {
             withType<MavenPublication> {
                 artifact(javadocJar)
                 pom {
-                    name.set("Miltibase")
+                    name.set("Multibase")
                     description.set("KMP Multibase Encoder/Decoder")
                     url.set("https://github.com/a-sit-plus/multibase")
                     licenses {
