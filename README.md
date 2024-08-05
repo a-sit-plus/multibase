@@ -14,9 +14,12 @@
 
 </div>
 
-This is a port of [Protocol Labs'](https://protocol.ai/) Kotlin/JVM [multibase implementation](https://github.com/changjiashuai/kotlin-multibase) to Kotlin
+This is combined a port of
+
+* [Protocol Labs'](https://protocol.ai/) Kotlin/JVM [multibase implementation](https://github.com/changjiashuai/kotlin-multibase) to Kotlin
 multiplatform with significant help from Matthew Nelson's awesome [encoding](https://github.com/05nelsonm/encoding) library and
-Uglješa Jovanović's [KMP bignum library](https://github.com/ionspin/kotlin-multiplatform-bignum).
+Uglješa Jovanović's [KMP bignum library](https://github.com/ionspin/kotlin-multiplatform-bignum)
+* [Erwin Kok's](https://erwinkok.org/) Kotlin [unsigned varint implementation](https://github.com/erwin-kok/multiformat/blob/main/src/main/kotlin/org/erwinkok/multiformat/util/UVarInt.kt) with some streamlining
 
 This project includes the original Protocol Labs repository as a git submodule for it's test vectors, but does not
 incorporate any code form it in releases.
@@ -59,10 +62,15 @@ Note: This library exposes Matthew Nelson's Base64, Base32, and Base16 encoders 
 
 Simply `MultiBase.decode(from_multibase_string)` or `MutltiBase.encode(Base.<desired>, any_byte_array)` to a multibase string
 or use the extension functions:
- * `multibase_string.multibaseDecode()`
+ * `multibaseString.multibaseDecode()`
  * `byteArray.multibaseEncode(Base.<desired>)`
 
 Note: Base10 and Base58 don't perform well. Only use those on small (<4KiB) data.
+
+`UVarInt` works similarly straight-forward:
+* Create: `UVarInt(1337u)`
+* Decode: `someVarIntByteArray.varIntDecode()` or `UVarInt.fromByteArray(someVarIntByteArray)`
+* Encode: `aUVarInt.encodeToByteArray()`
 
 'Nuff said!
 

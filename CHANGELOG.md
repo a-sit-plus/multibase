@@ -1,5 +1,8 @@
 # 1.x
 
+## 1.2.0
+* Include `UVarInt`
+
 ## 1.1.1
 * Fix Typo in POM
 
