@@ -74,6 +74,13 @@ Note: Base10 and Base58 don't perform well. Only use those on small (<4KiB) data
 
 'Nuff said!
 
+## Contributing
+External contributions are greatly appreciated!
+Just be sure to observe the contribution guidelines (see [CONTRIBUTING.md](CONTRIBUTING.md)).
+
+<br>
+
+
 <br>
 
 ---
