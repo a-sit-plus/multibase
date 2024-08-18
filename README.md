@@ -10,7 +10,7 @@
 [![Kotlin](https://img.shields.io/badge/kotlin-2.0.0-blue.svg?logo=kotlin)](http://kotlinlang.org)
 ![Java](https://img.shields.io/badge/java-17-blue.svg?logo=OPENJDK)
 
-## multi<sup>2</sup>–<sub>base</sub> = 100% pure Koltin *Multi*platform *Multibase* Encoder/Decoder
+## multi<sup>2</sup>–<sub>base</sub> = 100% pure Kotlin *Multi*platform *Multibase* Encoder/Decoder
 
 </div>
 
