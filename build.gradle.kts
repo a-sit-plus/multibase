@@ -1,7 +1,8 @@
 import org.gradle.kotlin.dsl.support.listFilesOrdered
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
-    kotlin("multiplatform") version "2.0.0"
+    kotlin("multiplatform") version "2.0.20"
     id("maven-publish")
     id("signing")
     id("io.github.gradle-nexus.publish-plugin") version "1.3.0"
@@ -94,10 +95,14 @@ kotlin {
         withJava() //for Java Interop tests
     }
 
-    js(IR) {
-        browser { testTask { enabled = false } }
-        nodejs()
+    listOf(
+        js(IR).apply { browser { testTask { enabled = false } } },
+        @OptIn(ExperimentalWasmDsl::class)
+        wasmJs().apply { browser { testTask { enabled = false } } }
+    ).forEach {
+        it.nodejs()
     }
+
     linuxX64()
     linuxArm64()
     mingwX64()

@@ -1,5 +1,9 @@
 # 1.x
 
+## 1.2.1
+* Kotlin 2.0.20
+* WasmJS support
+
 ## 1.2.0
 * Include `UVarInt`
 
