@@ -24,7 +24,7 @@ Uglješa Jovanović's [KMP bignum library](https://github.com/ionspin/kotlin-mul
 This project includes the original Protocol Labs repository as a git submodule for it's test vectors, but does not
 incorporate any code form it in releases.
 
-multi<sup>2</sup>–<sub>base</sub> supports the following multibase encodings:
+multi<sup>2</sup>–<sub>base</sub> runs on all KMP targets except `watchosDeviceArm64` and supports the following multibase encodings:
 * BASE10
 * BASE16
 * BASE16_UPPER
