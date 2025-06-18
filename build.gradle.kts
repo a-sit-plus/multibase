@@ -2,7 +2,7 @@ import org.gradle.kotlin.dsl.support.listFilesOrdered
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
-    kotlin("multiplatform") version "2.0.20"
+    kotlin("multiplatform") version "2.1.20"
     id("maven-publish")
     id("signing")
     id("io.github.gradle-nexus.publish-plugin") version "1.3.0"
@@ -29,7 +29,8 @@ tasks.dokkaHtml {
         File("${rootDir}/README.md").readText().replaceFirst("# ", "")
     val moduleTitle = "multibase"
 
-    moduleDesc.writeText("# Module $moduleTitle\n$readme"
+    moduleDesc.writeText(
+        "# Module $moduleTitle\n$readme"
     )
     moduleName.set(moduleTitle)
 
@@ -64,35 +65,41 @@ val javadocJar = tasks.register<Jar>("javadocJar") {
 
 
 //first sign everything, then publish!
-tasks.withType<AbstractPublishToMaven>() {
+tasks.withType<AbstractPublishToMaven> {
     tasks.withType<Sign>().forEach {
         dependsOn(it)
     }
 }
 
 kotlin {
-
-
-    macosArm64()
-    macosX64()
-    tvosArm64()
-    tvosX64()
-    tvosSimulatorArm64()
+    linuxX64()
+    linuxArm64()
+    androidNativeX64()
+    androidNativeX86()
+    androidNativeArm32()
+    androidNativeArm64()
     iosX64()
     iosArm64()
     iosSimulatorArm64()
+    macosX64()
+    macosArm64()
+    tvosArm64()
+    tvosSimulatorArm64()
+    tvosX64()
+    watchosArm32()
+    watchosArm64()
+    watchosX64()
+    watchosSimulatorArm64()
+    mingwX64()
 
 
     jvmToolchain(17)
     jvm {
-        compilations.all {
-            kotlinOptions {
-                freeCompilerArgs = listOf(
-                    "-Xjsr305=strict"
-                )
-            }
+        compilerOptions {
+            freeCompilerArgs = listOf(
+                "-Xjsr305=strict"
+            )
         }
-        withJava() //for Java Interop tests
     }
 
     listOf(
@@ -103,65 +110,57 @@ kotlin {
         it.nodejs()
     }
 
-    linuxX64()
-    linuxArm64()
-    mingwX64()
-
     sourceSets {
         commonMain.dependencies {
             implementation("com.ionspin.kotlin:bignum:0.3.10")
-            api("io.matthewnelson.encoding:base64:2.2.1")
-            api("io.matthewnelson.encoding:base32:2.2.1")
-            api("io.matthewnelson.encoding:base16:2.2.1")
+            api("io.matthewnelson.encoding:base64:2.4.0")
+            api("io.matthewnelson.encoding:base32:2.4.0")
+            api("io.matthewnelson.encoding:base16:2.4.0")
         }
 
         commonTest.dependencies {
             implementation(kotlin("test"))
         }
     }
+}
 
-    repositories {
-        mavenCentral()
-    }
-
-    publishing {
-        publications {
-            withType<MavenPublication> {
-                artifact(javadocJar)
-                pom {
-                    name.set("Multibase")
-                    description.set("KMP Multibase Encoder/Decoder")
+publishing {
+    publications {
+        withType<MavenPublication> {
+            artifact(javadocJar)
+            pom {
+                name.set("Multibase")
+                description.set("KMP Multibase Encoder/Decoder")
+                url.set("https://github.com/a-sit-plus/multibase")
+                licenses {
+                    license {
+                        name.set("MIT License")
+                        url.set("https://opensource.org/licenses/MIT")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("JesusMcCloud")
+                        name.set("Bernd Prünster")
+                        email.set("bernd.pruenster@a-sit.at")
+                    }
+                    developer {
+                        id.set("n0900")
+                        name.set("Simon Müller")
+                        email.set("simon.mueller@a-sit.at")
+                    }
+                }
+                scm {
+                    connection.set("scm:git:git@github.com:a-sit-plus/multibase.git")
+                    developerConnection.set("scm:git:git@github.com:a-sit-plus/multibase.git")
                     url.set("https://github.com/a-sit-plus/multibase")
-                    licenses {
-                        license {
-                            name.set("MIT License")
-                            url.set("https://opensource.org/licenses/MIT")
-                        }
-                    }
-                    developers {
-                        developer {
-                            id.set("JesusMcCloud")
-                            name.set("Bernd Prünster")
-                            email.set("bernd.pruenster@a-sit.at")
-                        }
-                        developer {
-                            id.set("n0900")
-                            name.set("Simon Müller")
-                            email.set("simon.mueller@a-sit.at")
-                        }
-                    }
-                    scm {
-                        connection.set("scm:git:git@github.com:a-sit-plus/multibase.git")
-                        developerConnection.set("scm:git:git@github.com:a-sit-plus/multibase.git")
-                        url.set("https://github.com/a-sit-plus/multibase")
-                    }
                 }
             }
         }
-        repositories {
-            mavenLocal {
-                signing.isRequired = false
-            }
+    }
+    repositories {
+        mavenLocal {
+            signing.isRequired = false
         }
     }
 }

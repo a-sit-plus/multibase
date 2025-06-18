@@ -9,16 +9,16 @@ class MultibaseTest {
 
 
     @Test
-    fun leading_zero() = foo("leading_zero")
+    fun leading_zero() = loadAndTest("leading_zero")
 
     @Test
-    fun two_leading_zeros() = foo("two_leading_zeros")
+    fun two_leading_zeros() = loadAndTest("two_leading_zeros")
 
     @Test
-    fun case_insensitivit() = foo("case_insensitivity", ignoreCase = true)
+    fun case_insensitivit() = loadAndTest("case_insensitivity", ignoreCase = true)
 
     @Test
-    fun basic() = foo("basic")
+    fun basic() = loadAndTest("basic")
 
     @Test
     fun encodeDecode() {
@@ -40,7 +40,7 @@ class MultibaseTest {
     }
 
     @OptIn(ExperimentalStdlibApi::class)
-    fun foo(file: String, ignoreCase: Boolean = false) {
+    fun loadAndTest(file: String, ignoreCase: Boolean = false) {
         val test = readCsv(file)
         val map = test.bases.map {
             it.key.getDecoder() to it.value
