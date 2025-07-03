@@ -21,8 +21,8 @@ multiplatform with significant help from Matthew Nelson's awesome [encoding](htt
 Uglješa Jovanović's [KMP bignum library](https://github.com/ionspin/kotlin-multiplatform-bignum)
 * [Erwin Kok's](https://erwinkok.org/) Kotlin [unsigned varint implementation](https://github.com/erwin-kok/multiformat/blob/main/src/main/kotlin/org/erwinkok/multiformat/util/UVarInt.kt) with some streamlining
 
-This project includes the original Protocol Labs repository as a git submodule for it's test vectors, but does not
-incorporate any code form it in releases.
+This project includes the original Protocol Labs repository as a git submodule for its test vectors, but does not
+incorporate any code from it in releases.
 
 multi<sup>2</sup>–<sub>base</sub> runs on all KMP targets except `watchosDeviceArm64` and supports the following multibase encodings:
 * BASE10
@@ -60,7 +60,7 @@ Note: This library exposes Matthew Nelson's Base64, Base32, and Base16 encoders 
 
 ### API
 
-Simply `MultiBase.decode(from_multibase_string)` or `MutltiBase.encode(Base.<desired>, any_byte_array)` to a multibase string
+Simply `MultiBase.decode(from_multibase_string)` or `MultiBase.encode(Base.<desired>, any_byte_array)` to a multibase string
 or use the extension functions:
  * `multibaseString.multibaseDecode()`
  * `byteArray.multibaseEncode(Base.<desired>)`
