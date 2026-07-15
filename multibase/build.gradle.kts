@@ -44,10 +44,10 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation("com.ionspin.kotlin:bignum:0.3.10")
-            api("io.matthewnelson.encoding:base64:2.4.0")
-            api("io.matthewnelson.encoding:base32:2.4.0")
-            api("io.matthewnelson.encoding:base16:2.4.0")
+            implementation(libs.bignum)
+            api(libs.base32)
+            api(libs.base64)
+            api(libs.base16)
         }
     }
 }
