@@ -1,0 +1,15 @@
+[versions]
+kotlin = "2.4.0"
+testballoon = "1.0.1-K2.4.0"
+bignum = "0.3.10"
+encoding = "2.4.0"
+
+[plugins]
+asp-conventions = { id = "at.asitplus.gradle.conventions", version = "20260701" }
+testballoon = { id = "de.infix.testBalloon", version.ref = "testballoon" }
+
+[libraries]
+bignum = { module= "com.ionspin.kotlin:bignum", version.ref="bignum"}
+base64 = { module= "io.matthewnelson.encoding:base64", version.ref="encoding"}
+base32 = { module= "io.matthewnelson.encoding:base32", version.ref="encoding"}
+base16 = { module= "io.matthewnelson.encoding:base16", version.ref="encoding"}

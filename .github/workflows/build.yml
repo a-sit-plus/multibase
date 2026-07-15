@@ -17,5 +17,5 @@ jobs:
         with:
           name: multibase
           path: |
-            build/libs/*jar
-            build/libs/*klib
+            multibase/build/libs/*jar
+            multibase/build/libs/*klib
