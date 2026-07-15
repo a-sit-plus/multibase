@@ -9,7 +9,7 @@ import io.kotest.property.arbitrary.int
 val MultibaseTest by matrixSuite {
     compact("encode/decode") - {
         data("bases", MultiBase.Base.entries) - { base ->
-            property(Arb.byteArray(Arb.int(0..256), Arb.byte()), iterations = 128) test { bytes ->
+            property(Arb.byteArray(Arb.int(0..256), Arb.byte()), iterations = 1_000) test { bytes ->
                 MultiBase.decode(MultiBase.encode(base, bytes)) shouldBe bytes
             }
             data(

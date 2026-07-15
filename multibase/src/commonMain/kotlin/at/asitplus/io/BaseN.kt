@@ -1,4 +1,4 @@
-/* Originally created by Protocol labs, published at GitHub: https://github.com/changjiashuai/kotlin-multibase
+/* Originally created by Protocol Labs, published on GitHub: https://github.com/changjiashuai/kotlin-multibase
 under the terms of the MIT License.
 Slightly tweaked to allow for multiplatform use in 2024 by A-SIT Plus GmbH
 
@@ -35,81 +35,127 @@ import io.matthewnelson.encoding.base64.Base64ConfigBuilder
 import io.matthewnelson.encoding.core.Decoder.Companion.decodeToByteArray
 import io.matthewnelson.encoding.core.Encoder.Companion.encodeToString
 import io.matthewnelson.encoding.core.EncodingException
+import kotlin.math.ln
 
 
 /**
- * Use this to manually encode/decode BaseN, but only if you know what you're doing!
- * Originally created by [CJS](mailto:changjiashuai@gmail.com) on 2018/7/14 without documentation and since -- even though
- * it is extremely versatile -- it performs poorly, we better keep it like that. After all, we don't want to tempt
- * folk to produce code that performs poorly.
+ * Originally created by [CJS](mailto:changjiashuai@gmail.com) on 2018/7/14 without documentation and now replaced by a rewritten implementation.
  */
+@Deprecated("To be removed in 1.4.0")
 object BaseN {
 
-    fun decode(alphabet: String, base: BigInteger, input: String): ByteArray {
-        //short circuit 1
-        if (input.isEmpty()) return byteArrayOf()
-        //short circuit 2
-        if (input.all { it == alphabet[0] }) return ByteArray(input.length)
-        val bytes = decodeToBigInteger(alphabet, base, input).toByteArray()
-        val stripSignByte = bytes.size > 1 && bytes[0].compareTo(0) == 0 && bytes[1] < 0
-        var leadingZeros = 0
-        var i = 0
-        while (input[i] == alphabet[0]) {
-            leadingZeros++
-            i++
-        }
-        val tmp = ByteArray(bytes.size - (if (stripSignByte) 1 else 0) + leadingZeros)
-        bytes.copyInto(
-            tmp,
-            startIndex = if (stripSignByte) 1 else 0,
-            destinationOffset = leadingZeros,
-            endIndex = tmp.size - leadingZeros
-        )
-        return tmp
+    @Deprecated(
+        "To be removed in 1.4.0. Use the extension function instead",
+        ReplaceWith("input.decodeBaseN(alphabet, base)")
+    )
+    fun decode(alphabet: String, base: Int, input: String): ByteArray = input.decodeBaseN(alphabet, base)
+
+    @Deprecated(
+        "To be removed in 1.4.0. Use the extension function instead",
+        ReplaceWith("input.encodeBaseN(alphabet, base)")
+    )
+    fun encode(alphabet: String, base: Int, input: ByteArray): String = input.encodeBaseN(alphabet, base)
+
+    @Deprecated(
+        "To be removed in 1.4.0. Use the Int radix overload",
+        ReplaceWith("decode(alphabet, base.intValue(), input)")
+    )
+    fun decode(alphabet: String, base: BigInteger, input: String): ByteArray =
+        input.decodeBaseN(alphabet, compatibleRadix(alphabet, base))
+
+    @Deprecated(
+        "To be removed in 1.4.0. Use the Int radix overload",
+        ReplaceWith("encode(alphabet, base.intValue(), input)")
+    )
+    fun encode(alphabet: String, base: BigInteger, input: ByteArray): String =
+        input.encodeBaseN(alphabet, compatibleRadix(alphabet, base))
+
+    @Deprecated("To be removed in 1.4.0. Decode to ByteArray instead")
+    fun decodeToBigInteger(alphabet: String, base: BigInteger, input: String): BigInteger =
+        BigInteger.fromByteArray(input.decodeBaseN(alphabet, compatibleRadix(alphabet, base)), Sign.POSITIVE)
+
+    @Deprecated("To be removed in 1.4.0. Decode to ByteArray instead")
+    fun String.decodeToBigInteger(alphabet: String, base: BigInteger): BigInteger {
+        return BigInteger.fromByteArray(decodeBaseN(alphabet, compatibleRadix(alphabet, base)), Sign.POSITIVE)
     }
 
-    fun encode(alphabet: String, base: BigInteger, input: ByteArray): String {
-        //short circuit 1
-        if (input.isEmpty()) return ""
-        //short circuit 2
-        if (input.all { it == 0.toByte() }) return alphabet[0].toString().repeat(input.size)
-        var bi = BigInteger.fromByteArray(input, Sign.POSITIVE)
-        val sb = StringBuilder()
-        while (bi >= base) {
-            //求余
-            val mod = bi.mod(base)
-            sb.insert(0, alphabet[mod.intValue()])
-            bi = bi.subtract(mod).divide(base)
-        }
-        sb.insert(0, alphabet[bi.intValue()])
-        //convert leading zeros.
-        for (b in input) {
-            if (b.compareTo(0) == 0) {
-                sb.insert(0, alphabet[0])
-            } else {
-                break
-            }
-        }
-        return sb.toString()
+    private fun compatibleRadix(alphabet: String, base: BigInteger): Int = base.intValue().also {
+        validate(alphabet, it)
     }
 
-    fun decodeToBigInteger(alphabet: String, base: BigInteger, input: String): BigInteger {
-        var bi = BigInteger.ZERO
-        for (i in input.length - 1 downTo 0) {
-            val alphaIndex = alphabet.indexOf(input[i])
-            if (alphaIndex == -1) {
-                throw EncodingException("Illegal character " + input[i] + " at " + i)
-            }
-            bi = bi.add(BigInteger.fromLong(alphaIndex.toLong()).multiply(base.pow(input.length - 1 - i)))
+
+}
+
+private fun validate(alphabet: String, base: Int) {
+    require(base in 2..alphabet.length) { "Base must be between 2 and the alphabet size" }
+    require(alphabet.toSet().size == alphabet.length) { "Alphabet characters must be unique" }
+}
+
+private fun bufferSize(digits: Int, fromBase: Int, toBase: Int): Int {
+    val size = digits * ln(fromBase.toDouble()) / ln(toBase.toDouble()) + 1
+    require(size <= Int.MAX_VALUE) { "Input is too large" }
+    return size.toInt()
+}
+
+/**
+ * Base-N-decodes this string into a ByteArray.
+ */
+fun String.decodeBaseN(alphabet: String, base: Int): ByteArray {
+    validate(alphabet, base)
+    if (isEmpty()) return byteArrayOf()
+    val leadingZeros = indexOfFirst { it != alphabet[0] }.let { if (it < 0) length else it }
+    val decoded = ByteArray(bufferSize(length - leadingZeros, base, 256))
+    var length = 0
+    for (i in leadingZeros until this.length) {
+        var carry = alphabet.indexOf(this[i])
+        if (carry < 0) throw EncodingException("Illegal character ${this[i]} at $i")
+        var processed = 0
+        var j = decoded.lastIndex
+        while ((carry != 0 || processed < length) && j >= 0) {
+            carry += base * decoded[j].toUByte().toInt()
+            decoded[j--] = (carry % 256).toByte()
+            carry /= 256
+            processed++
         }
-        return bi
+        check(carry == 0)
+        length = processed
+    }
+    val start = decoded.size - length
+    return ByteArray(leadingZeros + length).also { decoded.copyInto(it, leadingZeros, start) }
+}
+
+/**
+ * Base-N-encodes this ByteArray into a String.
+ */
+@Throws(Throwable::class)
+fun ByteArray.encodeBaseN(alphabet: String, base: Int): String {
+    validate(alphabet, base)
+    if (isEmpty()) return ""
+    val leadingZeros = indexOfFirst { it != 0.toByte() }.let { if (it < 0) size else it }
+    val encoded = ByteArray(bufferSize(size - leadingZeros, 256, base))
+    var length = 0
+    for (i in leadingZeros until size) {
+        var carry = this[i].toUByte().toInt()
+        var processed = 0
+        var j = encoded.lastIndex
+        while ((carry != 0 || processed < length) && j >= 0) {
+            carry += 256 * encoded[j].toUByte().toInt()
+            encoded[j--] = (carry % base).toByte()
+            carry /= base
+            processed++
+        }
+        check(carry == 0)
+        length = processed
+    }
+    return buildString(leadingZeros + length) {
+        repeat(leadingZeros) { append(alphabet[0]) }
+        for (i in encoded.size - length until encoded.size) append(alphabet[encoded[i].toUByte().toInt()])
     }
 }
 
-
 /**
  * [RFC4648](https://www.ietf.org/rfc/rfc4648.txt) Multibase encoder/decoder
- * Initially Created by [CJS](mailto:changjiashuai@gmail.com) on 2018/7/12.
+ * Initially created by [CJS](mailto:changjiashuai@gmail.com) on 2018/7/12.
  */
 object MultiBase {
     /**
@@ -152,7 +198,7 @@ object MultiBase {
      */
     fun encode(base: Base, data: ByteArray): String {
         return when (base) {
-            Base.BASE10 -> base.prefix + BaseN.encode(base.alphabet, BigInteger(10), data)
+            Base.BASE10 -> base.prefix + data.encodeBaseN(base.alphabet, 10)
             Base.BASE16 -> base.prefix + data.encodeToString(Base16Lower)
             Base.BASE16_UPPER -> base.prefix + data.encodeToString(Base16Upper)
             Base.BASE32 -> base.prefix + data.encodeToString(Base32Lower)
@@ -163,8 +209,8 @@ object MultiBase {
             Base.BASE32_HEX_UPPER -> base.prefix + data.encodeToString(Base32HexUpper)
             Base.BASE32_HEX_PAD -> base.prefix + data.encodeToString(Base32HexPadLower)
             Base.BASE32_HEX_PAD_UPPER -> base.prefix + data.encodeToString(Base32HexPadUpper)
-            Base.BASE58_FLICKR -> base.prefix + BaseN.encode(base.alphabet, BigInteger(58), data)
-            Base.BASE58_BTC -> base.prefix + BaseN.encode(base.alphabet, BigInteger(58), data)
+            Base.BASE58_FLICKR -> base.prefix + data.encodeBaseN(base.alphabet, 58)
+            Base.BASE58_BTC -> base.prefix + data.encodeBaseN(base.alphabet, 58)
             Base.BASE64 -> base.prefix + data.encodeToString(Base64NoPadding)
             Base.BASE64_URL -> base.prefix + data.encodeToString(Base64UrlNoPadding)
             Base.BASE64_PAD -> base.prefix + data.encodeToString(Base64)
@@ -174,7 +220,7 @@ object MultiBase {
 
     /**
      * Decodes the given multibase [data] into a ByteArray.
-     * This method throws Exceptions for strings that are not valid multibase encodings.
+     * This method throws an exception for strings that are not valid multibase encodings.
      *
      * Returns `null` if the encoding is not supported (e.g. Base-256 Emoji).
      */
@@ -183,9 +229,9 @@ object MultiBase {
         val prefix = data[0]
         val rest = data.substring(1)
         return when (val base = Base.lookup(prefix)) {
-            Base.BASE10 -> BaseN.decode(base.alphabet, BigInteger(10), rest)
+            Base.BASE10 -> rest.decodeBaseN(base.alphabet, 10)
             Base.BASE16 -> rest.decodeToByteArray(Base16Lower)
-            Base.BASE16_UPPER ->  rest.decodeToByteArray(Base16Upper)
+            Base.BASE16_UPPER -> rest.decodeToByteArray(Base16Upper)
             Base.BASE32 -> rest.decodeToByteArray(Base32Lower)
             Base.BASE32_PAD -> rest.decodeToByteArray(Base32Pad)
             Base.BASE32_HEX_PAD -> rest.decodeToByteArray(Base32HexPadLower)
@@ -194,8 +240,8 @@ object MultiBase {
             Base.BASE32_HEX -> rest.decodeToByteArray(Base32HexLower)
             Base.BASE32_HEX_UPPER -> rest.uppercase().decodeToByteArray(Base32HexLower)
             Base.BASE32_HEX_PAD_UPPER -> rest.uppercase().decodeToByteArray(Base32HexPadLower)
-            Base.BASE58_FLICKR -> BaseN.decode(base.alphabet, BigInteger(58), rest)
-            Base.BASE58_BTC -> BaseN.decode(base.alphabet, BigInteger(58), rest)
+            Base.BASE58_FLICKR -> rest.decodeBaseN(base.alphabet, 58)
+            Base.BASE58_BTC -> rest.decodeBaseN(base.alphabet, 58)
             Base.BASE64 -> rest.decodeToByteArray(Base64NoPadding)
             Base.BASE64_URL -> rest.decodeToByteArray(Base64UrlNoPadding)
             Base.BASE64_PAD -> rest.decodeToByteArray(Base64)
@@ -207,7 +253,7 @@ object MultiBase {
 
 /**
  * Decodes this string into a ByteArray.
- * This method throws Exceptions for strings that are not valid multibase encodings.
+ * This method throws an exception for strings that are not valid multibase encodings.
  *
  * Returns `null` if the encoding is not supported (e.g. Base-256 Emoji).
  */
@@ -253,14 +299,14 @@ private val Base32Lower = Base32Default { encodeToLowercase = true; padEncoded =
 private val Base32Upper = Base32Default { encodeToLowercase = false; padEncoded = false }
 
 private val Base32Pad = Base32Default { isLenient = false; padEncoded = true; encodeToLowercase = true }
-private val Base32PadUpper = Base32Default { isLenient = false; padEncoded = true;encodeToLowercase = false }
+private val Base32PadUpper = Base32Default { isLenient = false; padEncoded = true; encodeToLowercase = false }
 
-private val Base32HexPadLower = Base32Hex { isLenient = false; padEncoded = true;encodeToLowercase = true }
-private val Base32HexPadUpper = Base32Hex { isLenient = false; padEncoded = true;encodeToLowercase = false }
+private val Base32HexPadLower = Base32Hex { isLenient = false; padEncoded = true; encodeToLowercase = true }
+private val Base32HexPadUpper = Base32Hex { isLenient = false; padEncoded = true; encodeToLowercase = false }
 
 
-private val Base32HexLower = Base32Hex { padEncoded = false;encodeToLowercase = true }
-private val Base32HexUpper = Base32Hex { padEncoded = false;encodeToLowercase = false }
+private val Base32HexLower = Base32Hex { padEncoded = false; encodeToLowercase = true }
+private val Base32HexUpper = Base32Hex { padEncoded = false; encodeToLowercase = false }
 
 private val Base16Lower = Base16 { encodeToLowercase = true }
 private val Base16Upper = Base16 { encodeToLowercase = false }

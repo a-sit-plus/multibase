@@ -1,12 +1,12 @@
 // Based on UVarInt.kt (https://github.com/erwin-kok/multiformat/blob/main/src/main/kotlin/org/erwinkok/multiformat/util/UVarInt.kt)
-// Originally Copyright (c) 2022 Erwin Kok under the term of the BSD-3-Clause license.
+// Originally Copyright (c) 2022 Erwin Kok under the terms of the BSD-3-Clause license.
 // Simplified by A-SIT Plus in 2024
 
 package at.asitplus.io
 
 
 /**
- * Unsigned varint datatype, MAX_VALUE=[ULong.MAX_VALUE]
+ * Unsigned variable-length integer supporting values up to 2^63 - 1.
  */
 class UVarInt private constructor(private val number: ULong) {
     /**
@@ -15,12 +15,12 @@ class UVarInt private constructor(private val number: ULong) {
     constructor(number: UInt) : this(number.toULong())
 
     /**
-     * returns the ULong value of this UVarInt
+     * Returns the ULong value of this UVarInt.
      */
     fun toULong(): ULong = number
 
     /**
-     * encodes this number's value into a ByteArray using varint encoding
+     * Encodes this number's value into a ByteArray using varint encoding.
      */
     fun encodeToByteArray(): ByteArray {
         var acc = number
@@ -36,14 +36,14 @@ class UVarInt private constructor(private val number: ULong) {
 
     companion object {
         /**
-         * maximum number of bytes representing an uvarint in this encoding,
-         * supporting a maximum value of 2^63 (uint63).
+         * Maximum number of bytes representing a UVarInt in this encoding,
+         * supporting values up to 2^63 - 1.
          */
         const val MAX_BYTES = 9L
 
         /**
-         * decodes a varint-encoded ByteArray into a UVarInt
-         * @throws NumberFormatException on illegal input (e.g. values larger than unit63, or non-minimal encoding)
+         * Decodes a varint-encoded ByteArray into a UVarInt.
+         * @throws NumberFormatException on illegal input (e.g. values larger than 2^63 - 1 or non-minimal encodings)
          */
         @Throws(NumberFormatException::class)
         fun fromByteArray(bytes: ByteArray): UVarInt = UVarInt(decode(bytes))
@@ -76,8 +76,7 @@ class UVarInt private constructor(private val number: ULong) {
 
 /**
  * Extension function to decode this ByteArray to an [UVarInt] using [UVarInt.fromByteArray]
- * @throws NumberFormatException on illegal input (e.g. values larger than unit63, or non-minimal encoding)
+ * @throws NumberFormatException on illegal input (e.g. values larger than 2^63 - 1 or non-minimal encodings)
  */
 @Throws(NumberFormatException::class)
 fun ByteArray.varIntDecode() = UVarInt.fromByteArray(this)
-
