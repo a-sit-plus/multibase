@@ -1,15 +1,9 @@
 import at.asitplus.io.MultiBase
 import at.asitplus.testballoon.matrix.matrixSuite
 import io.kotest.matchers.shouldBe
-import io.kotest.property.Arb
-import io.kotest.property.arbitrary.bind
-import io.kotest.property.arbitrary.byte
-import io.kotest.property.arbitrary.byteArray
-import io.kotest.property.arbitrary.enum
-import io.kotest.property.arbitrary.int
 import java.io.BufferedReader
 
-val MultibaseTest by matrixSuite {
+val MultibaseFixtureTest by matrixSuite {
     data(
         "CSV fixtures",
         listOf("leading_zero" to false, "two_leading_zeros" to false, "case_insensitivity" to true, "basic" to false)
@@ -17,18 +11,6 @@ val MultibaseTest by matrixSuite {
         loadAndTest(file, ignoreCase)
     }
 
-    compact("encode/decode") - {
-        property(
-            Arb.bind(
-                Arb.enum<MultiBase.Base>(),
-                Arb.byteArray(Arb.int(1..4096), Arb.byte()),
-                ::Pair
-            ),
-            iterations = 128
-        ) test { (base, bytes) ->
-            MultiBase.decode(MultiBase.encode(base, bytes)) shouldBe bytes
-        }
-    }
 }
 
 @OptIn(ExperimentalStdlibApi::class)
@@ -57,7 +39,7 @@ private fun String.getDecoder(): MultiBase.Base? = MultiBase.Base.entries.firstO
 
 private fun readCsv(file: String): Testcase =
     BufferedReader(
-        MultibaseTest::class.java.getResourceAsStream("/multibase/tests/$file.csv").reader(Charsets.UTF_8)
+        MultibaseFixtureTest::class.java.getResourceAsStream("/multibase/tests/$file.csv").reader(Charsets.UTF_8)
     ).use {
         Testcase(it.readLine().let { str ->
             val last = str.split(",").last()

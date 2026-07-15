@@ -46,6 +46,10 @@ import io.matthewnelson.encoding.core.EncodingException
 object BaseN {
 
     fun decode(alphabet: String, base: BigInteger, input: String): ByteArray {
+        //short circuit 1
+        if (input.isEmpty()) return byteArrayOf()
+        //short circuit 2
+        if (input.all { it == alphabet[0] }) return ByteArray(input.length)
         val bytes = decodeToBigInteger(alphabet, base, input).toByteArray()
         val stripSignByte = bytes.size > 1 && bytes[0].compareTo(0) == 0 && bytes[1] < 0
         var leadingZeros = 0
@@ -65,6 +69,10 @@ object BaseN {
     }
 
     fun encode(alphabet: String, base: BigInteger, input: ByteArray): String {
+        //short circuit 1
+        if (input.isEmpty()) return ""
+        //short circuit 2
+        if (input.all { it == 0.toByte() }) return alphabet[0].toString().repeat(input.size)
         var bi = BigInteger.fromByteArray(input, Sign.POSITIVE)
         val sb = StringBuilder()
         while (bi >= base) {
