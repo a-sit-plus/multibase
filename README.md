@@ -72,10 +72,19 @@ val encoded = byteArray.encodeBaseN(alphabet, radix)
 val decoded = encoded.decodeBaseN(alphabet, radix)
 ```
 
-`UVarInt` is similarly straightforward:
-* Create: `UVarInt(1337u)`
-* Decode: `someVarIntByteArray.varIntDecode()` or `UVarInt.fromByteArray(someVarIntByteArray)`
-* Encode: `aUVarInt.encodeToByteArray()`
+`UVarInt` supports values from `0` through `2^63 - 1`:
+
+```kotlin
+val encoded = UVarInt(1337uL).encodeToByteArray()
+val decoded = encoded.decodeAsUVarInt()
+
+val (leading, endIndex) = bytes.decodeLeadingUVarInt(startIndex)
+```
+
+`decodeAsUVarInt` requires the `UVarInt` to consume the rest of the array.
+`decodeLeadingUVarInt` instead returns the decoded value and the first index after it.
+The corresponding functions are `UVarInt.fromByteArrayStrict` and
+`UVarInt.fromByteArrayPermissive`; `varIntDecode` and `UVarInt.fromByteArray` are deprecated.
 
 'Nuff said!
 
