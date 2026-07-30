@@ -8,7 +8,8 @@ package at.asitplus.io
 /**
  * Unsigned variable-length integer supporting values up to 2^63 - 1.
  */
-data class UVarInt private constructor(private val number: ULong) {
+data class UVarInt(private val number: ULong) {
+    init { require(number <= Long.MAX_VALUE.toULong()) }
     /**
      * Convenience constructor to create an object from an unsigned int. To create larger UVarInts, use [fromByteArray].
      */
