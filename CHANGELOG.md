@@ -1,5 +1,12 @@
 # 1.x
 
+## NEXT
+* Deprecate `UVarInt.fromByteArray`, since it silently discarded trailing bytes
+* Add new `UVarInt` constructors:
+    * `UVarInt.fromByteArrayStrict`: parses entire input, fails on trailing bytes
+    * `UVarInt.fromByteArrayPermissive`: parses leading `UVarInt`, returns number of bytes consumed
+* Made the `UVarInt(ULong)` constructor public. `UVarInt` still only supports values up to `2^63-1` (9 encoded bytes)
+
 ## 1.3.0
 * Kotlin 2.4.0 and Gradle 9.2
 * Fix Base10 and Base58 resource hoggery
