@@ -53,7 +53,7 @@ data class UVarInt private constructor(private val number: ULong) {
         /**
          * Decodes the entirety of [bytes] into an [UVarInt].
          * @throws NumberFormatException on illegal input (e.g. values larger than 2^63 - 1 or non-minimal encodings)
-         * @throws IllegalArgumentException if the entire ByteArray was not consumed
+         * @throws IllegalArgumentException if [bytes] contains trailing bytes after the [UVarInt]
          */
         fun fromByteArrayStrict(bytes: ByteArray): UVarInt =
             decode(bytes).let {
@@ -74,9 +74,9 @@ data class UVarInt private constructor(private val number: ULong) {
         /** Decodes a varint-encoded leading ByteArray */
         private fun decode(encoded: ByteArray): Pair<ULong,Int> {
             var value = 0uL
-            var i = 0
-            while (true) {
-                val uByte = encoded[i++].toUByte()
+            encoded.forEachIndexed { i, byte ->
+                val s = (i*7)
+                val uByte = byte.toUByte()
                 if ((i == 9 && uByte >= 0x80u) || i > MAX_BYTES) {
                     // this is the 9th and last byte we're willing to read, but it
                     // signals there's more (1 in MSB).
@@ -84,13 +84,14 @@ data class UVarInt private constructor(private val number: ULong) {
                     throw NumberFormatException("varints larger than uint63 not supported")
                 }
                 if (uByte < 0x80u) {
-                    if (uByte == 0u.toUByte() && i > 0) {
+                    if (uByte == 0u.toUByte() && s > 0) {
                         throw NumberFormatException("varint not minimally encoded")
                     }
-                    return Pair(value or (uByte.toULong() shl (i*7)), i)
+                    return Pair(value or (uByte.toULong() shl s), i+1)
                 }
-                value = value or ((uByte and 0x7fu).toULong() shl (i*7))
+                value = value or ((uByte and 0x7fu).toULong() shl s)
             }
+            throw NumberFormatException("varint is not terminated (overruns array)")
         }
     }
 }
