@@ -8,3 +8,4 @@ pluginManagement {
 
 rootProject.name = "multibase-root"
 include(":multibase")
+include(":benchmarks")
