@@ -1,6 +1,6 @@
 # 1.x
 
-## NEXT
+## 1.4.0
 * Deprecate `UVarInt.fromByteArray`, since it silently discarded trailing bytes
 * Add new `UVarInt` constructors:
     * `UVarInt.fromByteArrayStrict`: parses entire input, fails on trailing bytes
