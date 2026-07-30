@@ -51,7 +51,8 @@ data class UVarInt(private val number: ULong) {
          */
         @Throws(NumberFormatException::class)
         @Deprecated(message="Specify explicitly whether you want to consume the entire byte array" +
-                "(use decodeFromByteArray or fromByteArrayPermissive)")
+                "(use fromByteArrayStrict or fromByteArrayPermissive)",
+            replaceWith = ReplaceWith("fromByteArrayStrict(bytes)"))
         fun fromByteArray(bytes: ByteArray): UVarInt = fromByteArrayPermissive(bytes).first
 
         /**
