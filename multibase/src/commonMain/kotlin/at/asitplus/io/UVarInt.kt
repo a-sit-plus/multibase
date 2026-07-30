@@ -26,13 +26,16 @@ data class UVarInt(private val number: ULong) {
     fun encodeToByteArray(): ByteArray {
         var acc = number
         var i = 0
-        val res = mutableListOf<Byte>()
+        // we never encode anything larger than 2^63-1 (which fits in 9*7 bits)
+        var res = ByteArray(9)
         while (acc >= 0x80u) {
-            res += (((acc and 0x7Fu) or 0x80u).toByte())
+            res[i++] = (((acc and 0x7Fu) or 0x80u).toByte())
             acc = (acc.toLong() ushr 7).toULong()
-            i++
+            require(i < res.size)
         }
-        return (res + (acc and 0x7Fu).toByte()).toByteArray()
+        res[i++] = (acc and 0x7Fu).toByte()
+        if (i == res.size) return res
+        else return res.copyOf(i)
     }
 
     companion object {
