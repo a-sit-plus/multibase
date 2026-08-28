@@ -1,5 +1,11 @@
 # 1.x
 
+## 1.4.1
+* Add utility constructors to `UVarInt` (from `Byte`, `UByte`, `Int`, `UInt`, and `Long`)
+* Add bounds-checked utility converters to `UVarInt` (to `Byte`, `UByte`, `Int`, `UInt`, and `Long`)
+* Add a `.varint` extension for `UInt` to allow `UVarInt` pseudo-literals (`0x1010u.varint`)
+* Add a `.uvarint` extension for `Long` to allow larger pseudo-literals with a less readability (`0x101010101010l.uvarint`)
+
 ## 1.4.0
 * Deprecate `UVarInt.fromByteArray`, since it silently discarded trailing bytes
 * Add new `UVarInt` constructors:
