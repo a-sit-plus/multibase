@@ -52,6 +52,7 @@ data class UVarInt(private val number: ULong) {
         operator fun invoke(number: Long) = UVarInt(number.also { require(it >= 0L) { "Number ($number) is negative" } }.toULong())
 
         val UInt.varint get() = UVarInt(this)
+        val Long.uvarint get() = UVarInt(this)
         /**
          * Maximum number of bytes representing a UVarInt in this encoding,
          * supporting values up to 2^63 - 1.
