@@ -25,8 +25,6 @@ SOFTWARE.
 
 package at.asitplus.io
 
-import com.ionspin.kotlin.bignum.integer.BigInteger
-import com.ionspin.kotlin.bignum.integer.Sign
 import io.matthewnelson.encoding.base16.Base16
 import io.matthewnelson.encoding.base32.Base32Default
 import io.matthewnelson.encoding.base32.Base32Hex
@@ -36,55 +34,6 @@ import io.matthewnelson.encoding.core.Decoder.Companion.decodeToByteArray
 import io.matthewnelson.encoding.core.Encoder.Companion.encodeToString
 import io.matthewnelson.encoding.core.EncodingException
 import kotlin.math.ln
-
-
-/**
- * Originally created by [CJS](mailto:changjiashuai@gmail.com) on 2018/7/14 without documentation and now replaced by a rewritten implementation.
- */
-@Deprecated("To be removed in 1.4.0")
-object BaseN {
-
-    @Deprecated(
-        "To be removed in 1.4.0. Use the extension function instead",
-        ReplaceWith("input.decodeBaseN(alphabet, base)")
-    )
-    fun decode(alphabet: String, base: Int, input: String): ByteArray = input.decodeBaseN(alphabet, base)
-
-    @Deprecated(
-        "To be removed in 1.4.0. Use the extension function instead",
-        ReplaceWith("input.encodeBaseN(alphabet, base)")
-    )
-    fun encode(alphabet: String, base: Int, input: ByteArray): String = input.encodeBaseN(alphabet, base)
-
-    @Deprecated(
-        "To be removed in 1.4.0. Use the Int radix overload",
-        ReplaceWith("decode(alphabet, base.intValue(), input)")
-    )
-    fun decode(alphabet: String, base: BigInteger, input: String): ByteArray =
-        input.decodeBaseN(alphabet, compatibleRadix(alphabet, base))
-
-    @Deprecated(
-        "To be removed in 1.4.0. Use the Int radix overload",
-        ReplaceWith("encode(alphabet, base.intValue(), input)")
-    )
-    fun encode(alphabet: String, base: BigInteger, input: ByteArray): String =
-        input.encodeBaseN(alphabet, compatibleRadix(alphabet, base))
-
-    @Deprecated("To be removed in 1.4.0. Decode to ByteArray instead")
-    fun decodeToBigInteger(alphabet: String, base: BigInteger, input: String): BigInteger =
-        BigInteger.fromByteArray(input.decodeBaseN(alphabet, compatibleRadix(alphabet, base)), Sign.POSITIVE)
-
-    @Deprecated("To be removed in 1.4.0. Decode to ByteArray instead")
-    fun String.decodeToBigInteger(alphabet: String, base: BigInteger): BigInteger {
-        return BigInteger.fromByteArray(decodeBaseN(alphabet, compatibleRadix(alphabet, base)), Sign.POSITIVE)
-    }
-
-    private fun compatibleRadix(alphabet: String, base: BigInteger): Int = base.intValue().also {
-        validate(alphabet, it)
-    }
-
-
-}
 
 private fun validate(alphabet: String, base: Int) {
     require(base in 2..alphabet.length) { "Base must be between 2 and the alphabet size" }
