@@ -4,20 +4,27 @@
 
 package at.asitplus.io
 
+import kotlin.jvm.JvmName
+
 
 /**
  * Unsigned variable-length integer supporting values up to 2^63 - 1.
  */
 data class UVarInt(private val number: ULong) {
-    init { require(number <= Long.MAX_VALUE.toULong()) }
-    /**
-     * Convenience constructor to create an object from an unsigned int. To create larger UVarInts, use [fromByteArray].
-     */
-    constructor(number: UInt) : this(number.toULong())
+    init {
+        require(number <= Long.MAX_VALUE.toULong())
+        { "UVarInt supports values up to Long.MAX_VALUE (${Long.MAX_VALUE}. $number is out of bounds." }
+    }
+    constructor(number: Byte) : this(number.also { require(it >= 0.toByte()) { "Number ($number) is negative" } }.toULong())
+    constructor(number: Int) : this(number.also { require(it >= 0) { "Number ($number) is negative" } }.toULong())
 
     override fun toString() = "0x"+number.toString(16)
 
-    /** Returns the ULong value of this UVarInt. */
+    fun toByte() = number.also { require(it <= Byte.MAX_VALUE.toULong()) { "Value out of bounds for Byte" } }.toByte()
+    fun toUByte() = number.also { require(it <= UByte.MAX_VALUE.toULong()) { "Value out of bounds for UByte" } }.toUByte()
+    fun toInt() = number.also { require(it <= Int.MAX_VALUE.toULong()) { "Value out of bounds for Int" } }.toInt()
+    fun toUInt() = number.also { require(it <= UInt.MAX_VALUE.toULong()) { "Value out of bounds for UInt" } }.toUInt()
+    fun toLong() = number.toLong()
     fun toULong(): ULong = number
 
     /**
@@ -27,7 +34,7 @@ data class UVarInt(private val number: ULong) {
         var acc = number
         var i = 0
         // we never encode anything larger than 2^63-1 (which fits in 9*7 bits)
-        var res = ByteArray(MAX_BYTES)
+        val res = ByteArray(MAX_BYTES)
         while (acc >= 0x80u) {
             res[i++] = (((acc and 0x7Fu) or 0x80u).toByte())
             acc = (acc.toLong() ushr 7).toULong()
@@ -39,6 +46,12 @@ data class UVarInt(private val number: ULong) {
     }
 
     companion object {
+        // avoid jvm platform clashes
+        operator fun invoke(number: UByte) = UVarInt(number.toULong())
+        operator fun invoke(number: UInt) = UVarInt(number.toULong())
+        operator fun invoke(number: Long) = UVarInt(number.also { require(it >= 0L) { "Number ($number) is negative" } }.toULong())
+
+        val UInt.varint get() = UVarInt(this)
         /**
          * Maximum number of bytes representing a UVarInt in this encoding,
          * supporting values up to 2^63 - 1.
